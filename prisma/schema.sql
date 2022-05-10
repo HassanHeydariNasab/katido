@@ -15,6 +15,9 @@ CREATE TABLE "public"."Article" (
 
     "title" TEXT NOT NULL,
 
+    "st" TEXT NOT NULL, 
+    "tt" TEXT,
+
     "ownerId" INTEGER NOT NULL,
     FOREIGN KEY ("ownerId") REFERENCES "public"."User"(id)
 );
@@ -28,6 +31,9 @@ CREATE TABLE "public"."Paragraph" (
     seq INTEGER NOT NULL,
 
     "tagName" VARCHAR(255) NOT NULL,
+
+    "st" TEXT NOT NULL, 
+    "tt" TEXT,
 
     "articleId" INTEGER NOT NULL,
     FOREIGN KEY ("articleId") REFERENCES "public"."Article"(id)

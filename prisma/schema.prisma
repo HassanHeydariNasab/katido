@@ -12,6 +12,8 @@ model Article {
   createdAt  DateTime    @default(now()) @db.Timestamp(6)
   modifiedAt DateTime    @default(now()) @db.Timestamp(6)
   title      String
+  st         String
+  tt         String?
   ownerId    Int
   User       User        @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Paragraph  Paragraph[]
@@ -23,6 +25,8 @@ model Paragraph {
   modifiedAt DateTime @default(now()) @db.Timestamp(6)
   seq        Int
   tagName    String   @db.VarChar(255)
+  st         String
+  tt         String?
   articleId  Int
   Article    Article  @relation(fields: [articleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Phrase     Phrase[]
