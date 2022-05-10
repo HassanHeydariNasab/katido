@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,4 +5,43 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Article {
+  id        Int         @id @default(autoincrement())
+  createdAt DateTime    @default(now()) @db.Timestamp(6)
+  title     String
+  ownerId   Int
+  User      User        @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Paragraph Paragraph[]
+}
+
+model Paragraph {
+  id        Int      @id @default(autoincrement())
+  seq       Int
+  tagName   String   @db.VarChar(255)
+  articleId Int
+  Article   Article  @relation(fields: [articleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Phrase    Phrase[]
+}
+
+model Phrase {
+  id           Int       @id @default(autoincrement())
+  seq          Int
+  st           String
+  tt           String?
+  paragraphId  Int
+  translatorId Int
+  Paragraph    Paragraph @relation(fields: [paragraphId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User         User      @relation(fields: [translatorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  name      String    @db.VarChar(255)
+  email     String    @unique @db.VarChar(255)
+  coins     Int       @default(0)
+  Article   Article[]
+  Phrase    Phrase[]
 }
