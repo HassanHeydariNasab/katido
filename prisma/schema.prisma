@@ -8,25 +8,30 @@ datasource db {
 }
 
 model Article {
-  id        Int         @id @default(autoincrement())
-  createdAt DateTime    @default(now()) @db.Timestamp(6)
-  title     String
-  ownerId   Int
-  User      User        @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Paragraph Paragraph[]
+  id         Int         @id @default(autoincrement())
+  createdAt  DateTime    @default(now()) @db.Timestamp(6)
+  modifiedAt DateTime    @default(now()) @db.Timestamp(6)
+  title      String
+  ownerId    Int
+  User       User        @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Paragraph  Paragraph[]
 }
 
 model Paragraph {
-  id        Int      @id @default(autoincrement())
-  seq       Int
-  tagName   String   @db.VarChar(255)
-  articleId Int
-  Article   Article  @relation(fields: [articleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Phrase    Phrase[]
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now()) @db.Timestamp(6)
+  modifiedAt DateTime @default(now()) @db.Timestamp(6)
+  seq        Int
+  tagName    String   @db.VarChar(255)
+  articleId  Int
+  Article    Article  @relation(fields: [articleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Phrase     Phrase[]
 }
 
 model Phrase {
   id           Int       @id @default(autoincrement())
+  createdAt    DateTime  @default(now()) @db.Timestamp(6)
+  modifiedAt   DateTime  @default(now()) @db.Timestamp(6)
   seq          Int
   st           String
   tt           String?
@@ -37,11 +42,12 @@ model Phrase {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now()) @db.Timestamp(6)
-  name      String    @db.VarChar(255)
-  email     String    @unique @db.VarChar(255)
-  coins     Int       @default(0)
-  Article   Article[]
-  Phrase    Phrase[]
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now()) @db.Timestamp(6)
+  modifiedAt DateTime  @default(now()) @db.Timestamp(6)
+  name       String    @db.VarChar(255)
+  email      String    @unique @db.VarChar(255)
+  coins      Int       @default(0)
+  Article    Article[]
+  Phrase     Phrase[]
 }
