@@ -3,14 +3,19 @@ import type { GetServerSideProps } from "next";
 import { PrismaClient } from "@prisma/client";
 import type { Article } from "@prisma/client";
 import ArticleCard from "components/ArticleCard";
+import { useGetCurrentUserQuery } from "store/user/user.api";
+import { useTypedSelector } from "store/store";
 
 interface HomeProps {
   articles: Article[];
 }
 
 const Home: FC<HomeProps> = ({ articles }) => {
+  const { token } = useTypedSelector((state) => state.userSlice);
+  const { data: user } = useGetCurrentUserQuery(undefined, { skip: !token });
   return (
-    <div className={"h-full w-full"}>
+    <div className={"w-full h-full"}>
+      <header>{user ? `Hi ${user.name}` : ""}</header>
       <h2>Articles</h2>
       {articles.map((article) => (
         <ArticleCard article={article} />

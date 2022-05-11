@@ -1,8 +1,25 @@
+import { User } from "@prisma/client";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { REHYDRATE } from "redux-persist";
+import { RootState } from "store/store";
 
 export const userApi = createApi({
   reducerPath: "userApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: "/api",
+    prepareHeaders(headers, { getState }) {
+      if (headers.get("Authorization") === "placeholder") {
+        const { token } = (getState() as RootState).userSlice;
+        headers.set("Authorization", token);
+      }
+      return headers;
+    },
+  }),
+  extractRehydrationInfo(action, { reducerPath }) {
+    if (action.type === REHYDRATE) {
+      return action.payload[reducerPath];
+    }
+  },
   endpoints: (builder) => ({
     requestOtp: builder.mutation<
       { isUserExists: boolean },
@@ -24,7 +41,17 @@ export const userApi = createApi({
         body,
       }),
     }),
+    getCurrentUser: builder.query<User, void>({
+      query: () => ({
+        url: "/current-user",
+        headers: [["Authorization", "placeholder"]],
+      }),
+    }),
   }),
 });
 
-export const { useRequestOtpMutation, useVerifyOtpMutation } = userApi;
+export const {
+  useRequestOtpMutation,
+  useVerifyOtpMutation,
+  useGetCurrentUserQuery,
+} = userApi;
