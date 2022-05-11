@@ -16,7 +16,10 @@ const Button: FC<PropsWithChildren<ButtonProps>> = ({
   return (
     <button
       {...others}
-      className={"border-2 px-2 rounded-md " + others.className}
+      className={
+        "px-8 py-2 text-lg text-white bg-emerald-600 rounded-md border-none transition-colors cursor-pointer hover:bg-emerald-500 active:bg-emerald-700 " +
+        (others.className || "")
+      }
     >
       {children}
     </button>

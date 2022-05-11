@@ -1,14 +1,38 @@
-import Head from "next/head";
 import type { FC } from "react";
+import Head from "next/head";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import Input from "components/atoms/Input";
+import Button from "components/atoms/Button";
+import { useRequestOtpMutation } from "store/user/user.api";
 
 interface LoginProps {}
 
 const Login: FC<LoginProps> = () => {
-  const { register, handleSubmit } = useForm<{ email: string }>();
+  const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<{ email: string }>();
+
+  const [requestOtp, { isLoading }] = useRequestOtpMutation();
 
   const onSubmitEmail = handleSubmit((data) => {
-    console.log({ data });
+    const { email } = data;
+    requestOtp({ body: { email } })
+      .unwrap()
+      .then(({ isUserExists }) => {
+        router.push(
+          {
+            pathname: "/otp",
+            query: `email=${email}&isUserExists=${isUserExists ? 1 : 0}`,
+          },
+          { pathname: "/otp" }
+        );
+      });
   });
 
   return (
@@ -23,11 +47,13 @@ const Login: FC<LoginProps> = () => {
         <p className="py-2 text-3xl font-bold text-center text-gray-600">
           Enter your email
         </p>
-        <input
+        <Input
           {...register("email", { required: true })}
-          placeholder={"email"}
+          label={"Email"}
+          placeholder={"name@mail.com"}
+          error={errors.email?.message}
         />
-        <button type="submit">Continue &rarr;</button>
+        <Button type="submit">Continue &rarr;</Button>
       </form>
     </>
   );

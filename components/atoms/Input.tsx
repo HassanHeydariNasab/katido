@@ -6,42 +6,36 @@ import {
   PropsWithChildren,
 } from "react";
 
-type InputProps = DetailedHTMLProps<
+type HTMLInputProps = DetailedHTMLProps<
   InputHTMLAttributes<HTMLInputElement>,
   HTMLInputElement
 >;
 
+interface InputProps extends HTMLInputProps {
+  label?: string;
+  error?: string;
+}
+
 const Input: FC<PropsWithChildren<InputProps>> = forwardRef(
-  ({ children, ...others }, ref) => {
+  ({ children, label, error, ...others }, ref) => {
     return (
-      <input
-        {...others}
-        ref={ref}
-        className={"border-2 px-2 rounded-md " + others.className}
-      >
-        {children}
-      </input>
+      <label>
+        <span className="mx-1 capitalize text-zinc-200">{label}</span>
+        <br />
+        <input
+          {...others}
+          ref={ref}
+          className={
+            "p-2 mt-1 text-lg rounded-md border-2 border-solid transition-colors text-zinc-300 border-zinc-700 bg-zinc-900 hover:border-emerald-600 focus-visible:border-emerald-600 placeholder:text-zinc-700 " +
+            (others.className || "")
+          }
+        >
+          {children}
+        </input>
+        {error && <div className="p-2 text-red-400">{error}</div>}
+      </label>
     );
   }
 );
-
-const classes = {
-  base: "focus:outline-none transition ease-in-out duration-300",
-  disabled: "opacity-50 cursor-not-allowed",
-  pill: "rounded-full",
-  size: {
-    small: "px-2 py-1 text-sm",
-    normal: "px-4 py-2",
-    large: "px-8 py-3 text-lg",
-  },
-  variant: {
-    primary:
-      "bg-blue-500 hover:bg-blue-800 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-white",
-    secondary:
-      "bg-gray-200 hover:bg-gray-800 focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 text-gray-900 hover:text-white",
-    danger:
-      "bg-red-500 hover:bg-red-800 focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 text-white",
-  },
-};
 
 export default Input;

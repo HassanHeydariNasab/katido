@@ -10,10 +10,14 @@
   },
   "dependencies": {
     "@prisma/client": "3.13.0",
+    "@reduxjs/toolkit": "^1.8.1",
     "next": "12.1.6",
+    "njwt": "^1.2.0",
     "react": "18.1.0",
     "react-dom": "18.1.0",
-    "react-hook-form": "^7.31.0"
+    "react-hook-form": "^7.31.0",
+    "react-redux": "^8.0.1",
+    "tedis": "^0.1.12"
   },
   "devDependencies": {
     "@types/node": "^17.0.31",

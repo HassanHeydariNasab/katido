@@ -28,12 +28,3 @@ a {
   box-sizing: border-box;
   font-family: "Inter";
 }
-
-@layer components {
-  button {
-    @apply px-8 py-2 text-lg text-white bg-emerald-600 rounded-md border-none transition-colors cursor-pointer hover:bg-emerald-500 active:bg-emerald-700;
-  }
-  input {
-    @apply px-2 py-2 text-lg rounded-md border-2 border-solid transition-colors text-zinc-300 border-zinc-700 bg-zinc-900 hover:border-emerald-600 focus-visible:border-emerald-600;
-  }
-}
