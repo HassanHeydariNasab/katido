@@ -12,14 +12,6 @@ export default async function handler(
   if (req.method === "POST") {
     const { email } = req.body;
 
-    prisma.user.findUnique({ where: { email } }).then((user) => {
-      if (user === null) {
-        res.status(200).json({ isUserExists: false });
-      } else {
-        res.status(200).json({ isUserExists: true });
-      }
-    });
-
     const otp = Crypto.randomInt(100000, 200000).toString().substring(1);
 
     const tedis = await tedisPool.getTedis();
@@ -27,5 +19,12 @@ export default async function handler(
     tedisPool.putTedis(tedis);
 
     console.log({ otp });
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (user === null) {
+      res.status(200).json({ isUserExists: false });
+    } else {
+      res.status(200).json({ isUserExists: true });
+    }
   }
 }
