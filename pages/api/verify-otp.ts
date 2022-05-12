@@ -28,7 +28,10 @@ export default async function handler(
         userId = user.id;
       }
       token = createJWT({ id: userId }, process.env.JWT_SECRET).compact();
-      res.status(createdUser ? 201 : 200).json({ token });
+      res
+        .setHeader("Set-Cookie", `token=${token}`)
+        .status(createdUser ? 201 : 200)
+        .json({});
       tedis.del(email);
     } else {
       res.status(401).json({});

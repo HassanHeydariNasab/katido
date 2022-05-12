@@ -7,13 +7,6 @@ export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: fetchBaseQuery({
     baseUrl: "/api",
-    prepareHeaders(headers, { getState }) {
-      if (headers.get("Authorization") === "placeholder") {
-        const { token } = (getState() as RootState).userSlice;
-        headers.set("Authorization", token);
-      }
-      return headers;
-    },
   }),
   extractRehydrationInfo(action, { reducerPath }) {
     if (action.type === REHYDRATE && action.payload) {
@@ -44,7 +37,6 @@ export const userApi = createApi({
     getCurrentUser: builder.query<User, void>({
       query: () => ({
         url: "/current-user",
-        headers: [["Authorization", "placeholder"]],
       }),
     }),
   }),

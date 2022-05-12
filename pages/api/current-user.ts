@@ -10,7 +10,7 @@ export default async function handler(
   res: NextApiResponse<any>
 ) {
   if (req.method === "GET") {
-    const token = req.headers.authorization;
+    const token = req.cookies.token;
 
     try {
       const jwt = verifyJWT(token, process.env.JWT_SECRET);
