@@ -16,7 +16,7 @@ export const userApi = createApi({
     },
   }),
   extractRehydrationInfo(action, { reducerPath }) {
-    if (action.type === REHYDRATE) {
+    if (action.type === REHYDRATE && action.payload) {
       return action.payload[reducerPath];
     }
   },
