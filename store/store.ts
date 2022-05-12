@@ -9,10 +9,12 @@ import storage from "redux-persist-indexeddb-storage";
 import { rtkQueryErrorMiddleware } from "./middlewares";
 import { userApi } from "./user/user.api";
 import { userSlice } from "./user/user.slice";
+import { articleApi } from "./article/article.api";
 
 const reducer = combineReducers({
   [userApi.reducerPath]: userApi.reducer,
   [userSlice.name]: userSlice.reducer,
+  [articleApi.reducerPath]: articleApi.reducer,
 });
 
 export const store = configureStore({
@@ -29,6 +31,7 @@ export const store = configureStore({
     getDefaultMiddleware().concat([
       rtkQueryErrorMiddleware,
       userApi.middleware,
+      articleApi.middleware,
     ]),
 });
 

@@ -18,7 +18,7 @@ export default async function handler(
     if (user) {
       res.status(200).json(user);
     } else {
-      res.status(404).json({});
+      res.status(401).json({}); // it's actually a 404
     }
   }
 }

@@ -24,7 +24,6 @@ model Paragraph {
   createdAt  DateTime @default(now()) @db.Timestamp(6)
   modifiedAt DateTime @default(now()) @db.Timestamp(6)
   seq        Int
-  tagName    String   @db.VarChar(255)
   st         String
   tt         String?
   articleId  Int
@@ -40,9 +39,9 @@ model Phrase {
   st           String
   tt           String?
   paragraphId  Int
-  translatorId Int
+  translatorId Int?
   Paragraph    Paragraph @relation(fields: [paragraphId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User         User      @relation(fields: [translatorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User         User?     @relation(fields: [translatorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model User {

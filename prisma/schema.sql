@@ -30,8 +30,6 @@ CREATE TABLE "public"."Paragraph" (
 
     seq INTEGER NOT NULL,
 
-    "tagName" VARCHAR(255) NOT NULL,
-
     "st" TEXT NOT NULL, 
     "tt" TEXT,
 
@@ -52,6 +50,6 @@ CREATE TABLE "public"."Phrase" (
     "paragraphId" INTEGER NOT NULL,
     FOREIGN KEY ("paragraphId") REFERENCES "public"."Paragraph"(id),
 
-    "translatorId" INTEGER NOT NULL,
+    "translatorId" INTEGER,
     FOREIGN KEY ("translatorId") REFERENCES "public"."User"(id)
 );
