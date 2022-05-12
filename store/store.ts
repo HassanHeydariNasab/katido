@@ -6,6 +6,7 @@ import { persistReducer, persistStore } from "redux-persist";
 import autoMergeLevel2 from "redux-persist/lib/stateReconciler/autoMergeLevel2";
 // @ts-ignore
 import storage from "redux-persist-indexeddb-storage";
+import { rtkQueryErrorMiddleware } from "./middlewares";
 import { userApi } from "./user/user.api";
 import { userSlice } from "./user/user.slice";
 
@@ -25,7 +26,10 @@ export const store = configureStore({
     reducer
   ),
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(userApi.middleware),
+    getDefaultMiddleware().concat([
+      rtkQueryErrorMiddleware,
+      userApi.middleware,
+    ]),
 });
 
 setupListeners(store.dispatch);

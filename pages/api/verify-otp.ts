@@ -34,7 +34,7 @@ export default async function handler(
         .json({});
       tedis.del(email);
     } else {
-      res.status(401).json({});
+      res.status(403).json({});
     }
     tedisPool.putTedis(tedis);
   }

@@ -27,12 +27,11 @@ const Otp: FC = () => {
     const { otp, name } = data;
     verifyOtp({ body: { email: email as string, otp, name } })
       .unwrap()
-      .then(({ token }) => {
-        dispatch(userSlice.actions.setToken({ token }));
+      .then(() => {
         router.replace({ pathname: "/" });
       })
       .catch(({ status }) => {
-        if (status === 401) {
+        if (status === 403) {
           setError("otp", { message: "Code is invalid" });
         }
       });

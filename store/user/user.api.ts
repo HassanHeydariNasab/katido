@@ -25,7 +25,7 @@ export const userApi = createApi({
       }),
     }),
     verifyOtp: builder.mutation<
-      { token: string },
+      {},
       { body: { otp: string; email: string; name?: string } }
     >({
       query: ({ body }) => ({
