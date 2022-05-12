@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from "@prisma/client";
-import type { User } from "@prisma/client";
-import { verify as verifyJWT } from "njwt";
+import { tokenToUserId } from "utils/tokenToUserId";
 
 const prisma = new PrismaClient();
 
@@ -11,15 +10,15 @@ export default async function handler(
 ) {
   if (req.method === "GET") {
     const token = req.cookies.token;
-
-    try {
-      const jwt = verifyJWT(token, process.env.JWT_SECRET);
-      const user = await prisma.user.findUnique({
-        where: { id: +jwt.body.toJSON().id as number },
-      });
+    const userId = tokenToUserId(token, res);
+    if (userId === null) return;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (user) {
       res.status(200).json(user);
-    } catch (error) {
-      console.error(error);
+    } else {
+      res.status(404).json({});
     }
   }
 }
