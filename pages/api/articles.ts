@@ -1,8 +1,7 @@
 import { exec } from "node:child_process";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Paragraph, Phrase, PrismaClient } from "@prisma/client";
+import { Phrase, PrismaClient } from "@prisma/client";
 import Formidable from "formidable";
-import { JSDOM } from "jsdom";
 import { SentenceTokenizer } from "natural";
 import { tokenToUserId } from "utils/tokenToUserId";
 
@@ -12,22 +11,6 @@ export const config = {
     bodyParser: false,
   },
 };
-
-/*
-let seq = 0;
-function findTextAndSetClass(element: Element) {
-  if (element.firstElementChild === null) {
-    element.setAttribute("data-katido-seq", seq.toString());
-    seq++;
-    const nextElementSibling = element.nextElementSibling;
-    if (nextElementSibling !== null) {
-      findTextAndSetClass(nextElementSibling);
-    }
-  } else {
-    findTextAndSetClass(element.firstElementChild);
-  }
-}
-*/
 
 export default async function handler(
   req: NextApiRequest,
@@ -45,53 +28,34 @@ export default async function handler(
     formidable.on("file", (name, file) => {
       if (name === "file") {
         exec(
-          `python3 -m unoserver.converter --convert-to html ${file.filepath} -`,
+          `python3 -m unoserver.converter --convert-to txt ${file.filepath} -`,
           async (error, stdout, stderr) => {
             if (error === null) {
-              res.status(201).json({});
-              const dom = new JSDOM(stdout);
-              const body = dom.window.document.body;
-
-              //console.log({ content: body.textContent });
+              const articleST = stdout;
 
               const article = await prisma.article.create({
                 data: {
                   title: file.originalFilename,
-                  st: dom.serialize(),
+                  st: articleST.replace(/\n/g, "<br/><br/>"),
                   ownerId: userId,
                 },
               });
 
-              let seq = 0;
-              body.querySelectorAll("*").forEach((element, key, parent) => {
-                //console.log({ element, key, parent, seq });
-                if (
-                  element.firstElementChild === null &&
-                  element.textContent !== ""
-                ) {
-                  element.setAttribute("data-katido-seq", seq.toString());
-                  seq++;
-                }
-              });
-
-              const _paragraphs = body.querySelectorAll("*[data-katido-seq]");
-              console.log({ _paragraphs });
+              const _paragraphs = articleST.split("\n");
 
               for (let i = 0; i < _paragraphs.length; i++) {
-                let _paragraph = _paragraphs[i];
+                let _paragraph = _paragraphs[i].trim();
 
                 const paragraph = await prisma.paragraph.create({
                   data: {
-                    seq: +_paragraph.getAttribute("data-katido-seq"),
-                    st: _paragraph.textContent,
+                    seq: i,
+                    st: _paragraph,
                     articleId: article.id,
                   },
                 });
 
                 const sentenceTokenizer = new SentenceTokenizer();
-                const _phrases = sentenceTokenizer.tokenize(
-                  _paragraph.textContent
-                );
+                const _phrases = sentenceTokenizer.tokenize(_paragraph);
                 const phrases: Partial<Phrase>[] = _phrases.map(
                   (_phrase, index) => ({
                     seq: index,
@@ -99,11 +63,12 @@ export default async function handler(
                     paragraphId: paragraph.id,
                   })
                 );
-                const r = await prisma.phrase.createMany({
+                await prisma.phrase.createMany({
                   data: phrases as Phrase[],
                 });
-                console.log({ phrases, r });
               }
+
+              res.status(201).json({});
             } else {
               res
                 .status(400)

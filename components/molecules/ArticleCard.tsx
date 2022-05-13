@@ -8,8 +8,8 @@ interface ArticleCardProps {
 const ArticleCard: FC<ArticleCardProps> = ({ article: { title, st, tt } }) => {
   return (
     <div className="flex-1 bg-slate-500">
-      <h3 className="font-medium text-xl">{title}</h3>
-      <p>{st}</p>
+      <h3 className="text-xl font-medium">{title}</h3>
+      <p dangerouslySetInnerHTML={{ __html: st }}></p>
       <p>{tt}</p>
     </div>
   );
