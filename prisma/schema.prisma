@@ -8,40 +8,23 @@ datasource db {
 }
 
 model Article {
-  id         Int         @id @default(autoincrement())
-  createdAt  DateTime    @default(now()) @db.Timestamp(6)
-  modifiedAt DateTime    @default(now()) @db.Timestamp(6)
-  title      String
-  st         String
-  tt         String?
-  ownerId    Int
-  User       User        @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Paragraph  Paragraph[]
-}
-
-model Paragraph {
   id         Int      @id @default(autoincrement())
   createdAt  DateTime @default(now()) @db.Timestamp(6)
   modifiedAt DateTime @default(now()) @db.Timestamp(6)
-  seq        Int
-  st         String
-  tt         String?
-  articleId  Int
-  Article    Article  @relation(fields: [articleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Phrase     Phrase[]
+  title      String
+  ownerId    Int
+  User       User     @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Phrase {
-  id           Int       @id @default(autoincrement())
-  createdAt    DateTime  @default(now()) @db.Timestamp(6)
-  modifiedAt   DateTime  @default(now()) @db.Timestamp(6)
-  seq          Int
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now()) @db.Timestamp(6)
+  modifiedAt   DateTime @default(now()) @db.Timestamp(6)
   st           String
-  tt           String?
-  paragraphId  Int
+  tt           String
+  score        Int?     @default(0)
   translatorId Int?
-  Paragraph    Paragraph @relation(fields: [paragraphId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User         User?     @relation(fields: [translatorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User         User?    @relation(fields: [translatorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model User {
