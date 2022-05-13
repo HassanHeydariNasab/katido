@@ -1,4 +1,5 @@
 import { exec } from "node:child_process";
+import { cwd } from "node:process";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Phrase, PrismaClient } from "@prisma/client";
 import Formidable from "formidable";
@@ -25,49 +26,26 @@ export default async function handler(
     if (userId === null) return;
 
     const formidable = Formidable();
-    formidable.on("file", (name, file) => {
+    formidable.on("file", async (name, file) => {
       if (name === "file") {
+        const article = await prisma.article.create({
+          data: {
+            title: file.originalFilename,
+            st: "",
+            ownerId: userId,
+          },
+        });
         exec(
-          `python3 -m unoserver.converter --convert-to txt ${file.filepath} -`,
+          `python3 -m unoserver.converter --convert-to odt ${
+            file.filepath
+          } ${cwd()}/upload/st/${
+            article.id
+          }.odt ; odf2xliff -i ${cwd()}/upload/st/${
+            article.id
+          }.odt -o ${cwd()}/upload/xlf/${article.id}.xlf`,
           async (error, stdout, stderr) => {
+            console.log({ stdout, stderr });
             if (error === null) {
-              const articleST = stdout.trim();
-
-              const article = await prisma.article.create({
-                data: {
-                  title: file.originalFilename,
-                  st: articleST.replace(/\n/g, "<br/><br/>"),
-                  ownerId: userId,
-                },
-              });
-
-              const _paragraphs = articleST.split("\n");
-
-              for (let i = 0; i < _paragraphs.length; i++) {
-                let _paragraph = _paragraphs[i].trim();
-
-                const paragraph = await prisma.paragraph.create({
-                  data: {
-                    seq: i,
-                    st: _paragraph,
-                    articleId: article.id,
-                  },
-                });
-
-                const sentenceTokenizer = new SentenceTokenizer();
-                const _phrases = sentenceTokenizer.tokenize(_paragraph);
-                const phrases: Partial<Phrase>[] = _phrases.map(
-                  (_phrase, index) => ({
-                    seq: index,
-                    st: _phrase,
-                    paragraphId: paragraph.id,
-                  })
-                );
-                await prisma.phrase.createMany({
-                  data: phrases as Phrase[],
-                });
-              }
-
               res.status(201).json({});
             } else {
               res
