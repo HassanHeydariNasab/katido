@@ -13,10 +13,12 @@ const Home: FC<HomeProps> = ({ articles }) => {
   return (
     <div className={"w-full h-full"}>
       <Header />
-      <h2>Articles</h2>
-      {articles.map((article) => (
-        <ArticleCard article={article} />
-      ))}
+      <h2 className="px-4 text-center text-zinc-200">Untranslated</h2>
+      <div className="flex flex-wrap gap-8 justify-center px-4">
+        {articles.map((article) => (
+          <ArticleCard article={article} />
+        ))}
+      </div>
     </div>
   );
 };
