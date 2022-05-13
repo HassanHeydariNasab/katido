@@ -31,7 +31,7 @@ export default async function handler(
           `python3 -m unoserver.converter --convert-to txt ${file.filepath} -`,
           async (error, stdout, stderr) => {
             if (error === null) {
-              const articleST = stdout;
+              const articleST = stdout.trim();
 
               const article = await prisma.article.create({
                 data: {
