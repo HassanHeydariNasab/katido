@@ -1,9 +1,8 @@
 import { exec } from "node:child_process";
 import { cwd } from "node:process";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Phrase, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import Formidable from "formidable";
-import { SentenceTokenizer } from "natural";
 import { tokenToUserId } from "utils/tokenToUserId";
 
 const prisma = new PrismaClient();

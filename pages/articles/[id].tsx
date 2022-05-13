@@ -1,8 +1,7 @@
-import { FC } from "react";
+import type { FC } from "react";
 import type { GetServerSideProps } from "next";
 import { PrismaClient } from "@prisma/client";
 import type { Article } from "@prisma/client";
-import ArticleCard from "components/molecules/ArticleCard";
 import Header from "components/molecules/Header";
 
 interface ArticleProps {
@@ -14,10 +13,6 @@ const Home: FC<ArticleProps> = ({ article }) => {
     <div className={"w-full h-full"}>
       <Header />
       <h2 className="px-4 text-center text-zinc-200">{article.title}</h2>
-      <div
-        className="px-4 bg-zinc-300"
-        dangerouslySetInnerHTML={{ __html: article.st }}
-      ></div>
     </div>
   );
 };
