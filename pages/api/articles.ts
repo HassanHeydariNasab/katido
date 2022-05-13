@@ -30,7 +30,6 @@ export default async function handler(
         const article = await prisma.article.create({
           data: {
             title: file.originalFilename,
-            st: "",
             ownerId: userId,
           },
         });
