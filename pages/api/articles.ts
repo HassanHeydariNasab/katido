@@ -44,7 +44,7 @@ export default async function handler(
           async (error, stdout, stderr) => {
             console.log({ stdout, stderr });
             if (error === null) {
-              res.status(201).json({});
+              res.status(201).json({ article });
             } else {
               res
                 .status(400)
