@@ -8,18 +8,13 @@ import type { Article } from "@prisma/client";
 import { SentenceTokenizer } from "natural";
 import Header from "components/molecules/Header";
 
-interface ArticleProps {
-  article: Article;
-  xlf: string;
-}
-
 interface Unit {
   st: string;
   tt: string;
   phrases: Partial<Phrase>[];
 }
 
-const Xlf: FC<{ xlf: string }> = ({ xlf }) => {
+const Xlf: FC<{ xlf: string; title: string }> = ({ xlf, title }) => {
   const [units, setUnits] = useState<Unit[] | null>(null);
 
   useEffect(() => {
@@ -47,14 +42,24 @@ const Xlf: FC<{ xlf: string }> = ({ xlf }) => {
     return undefined;
   }
   return (
-    <div className="bg-zinc-200">
+    <div className="flex overflow-x-hidden overflow-y-scroll relative flex-col flex-1 gap-4 px-4">
+      <h2 className="px-4 text-center text-zinc-200">{title}</h2>
       {units.map((unit, index) => (
-        <form key={index}>
-          <p>{unit.st}</p>
-          <input defaultValue={unit.tt} />
-          <div className="bg-zinc-500">
-            {unit.phrases.map((phrase) => (
-              <p>{phrase.st}</p>
+        <form key={index} className="p-2 rounded-lg bg-zinc-800">
+          <p dir="auto" className="p-4 text-zinc-300">
+            {unit.st}
+          </p>
+          <div className="p-4 text-white rounded-lg bg-zinc-900">
+            {unit.phrases.map((phrase, index) => (
+              <div key={index}>
+                <p dir="auto">{phrase.st}</p>
+                <textarea
+                  defaultValue={phrase.tt}
+                  className="p-2 w-full text-base text-white rounded-md bg-zinc-900"
+                  aria-multiline={"true"}
+                  dir="auto"
+                />
+              </div>
             ))}
           </div>
         </form>
@@ -63,27 +68,29 @@ const Xlf: FC<{ xlf: string }> = ({ xlf }) => {
   );
 };
 
+interface ArticleProps {
+  article: Article;
+  xlf: string;
+}
+
 const Home: FC<ArticleProps> = ({ article, xlf }) => {
   return (
-    <div className={"w-full h-full"}>
+    <div className={"flex flex-col h-full bg-zinc-600"}>
       <Header />
-      <h2 className="px-4 text-center text-zinc-200">{article.title}</h2>
-
-      <Xlf xlf={xlf} />
+      <Xlf xlf={xlf} title={article.title} />
     </div>
   );
 };
-
-const prisma = new PrismaClient();
 
 export const getServerSideProps: GetServerSideProps = async ({
   query: { id },
   res,
 }) => {
+  const prisma = new PrismaClient();
   const article = await prisma.article.findUnique({
     where: { id: +id as number },
   });
-  if (article === null) res.statusCode = 404;
+  if (article === null) return { notFound: true };
   let xlf = "";
   try {
     xlf = await readFile(`${cwd()}/upload/xlf/${id}.xlf`, {
@@ -91,7 +98,7 @@ export const getServerSideProps: GetServerSideProps = async ({
       flag: "r",
     });
   } catch (error) {
-    res.statusCode = 404;
+    return { notFound: true };
   }
   return { props: { article: JSON.parse(JSON.stringify(article)), xlf } };
 };

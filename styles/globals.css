@@ -10,13 +10,18 @@
 }
 
 html,
-body,
-body > div {
+body {
   padding: 0;
   margin: 0;
   font-family: Inter;
   height: calc(100vh - calc(100vh - 100%));
   background-color: #212121;
+}
+
+body > div {
+  height: 100%;
+  width: 100%;
+  display: flex;
 }
 
 a {
