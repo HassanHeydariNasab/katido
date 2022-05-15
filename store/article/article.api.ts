@@ -12,15 +12,50 @@ export const articleApi = createApi({
       return action.payload[reducerPath];
     }
   },
+  tagTypes: ["article", "articleXlf"],
   endpoints: (builder) => ({
-    updateArticle: builder.mutation<{}, { id: number; body: { xlf: string } }>({
+    getArticle: builder.query<Article, { id: number }>({
+      query: ({ id }) => ({
+        method: "GET",
+        url: `/articles/${id}`,
+      }),
+      providesTags: (result, error, { id }) => [{ type: "article", id }],
+    }),
+    updateArticle: builder.mutation<
+      void,
+      { id: number; body: Partial<Article> }
+    >({
       query: ({ id, body }) => ({
-        method: "PUT",
+        method: "PATCH",
         url: `/articles/${id}`,
         body,
       }),
+      invalidatesTags: (result, error, { id }) => [{ type: "article", id }],
+    }),
+    getArticleXlf: builder.query<{ xlf: string }, { id: number }>({
+      query: ({ id }) => ({
+        method: "GET",
+        url: `/articles/${id}/xlf`,
+      }),
+      providesTags: (result, error, { id }) => [{ type: "articleXlf", id }],
+    }),
+    replaceArticleXlf: builder.mutation<
+      void,
+      { id: number; body: { xlf: string } }
+    >({
+      query: ({ id, body }) => ({
+        method: "PUT",
+        url: `/articles/${id}/xlf`,
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "articleXlf", id }],
     }),
   }),
 });
 
-export const { useUpdateArticleMutation } = articleApi;
+export const {
+  useGetArticleQuery,
+  useUpdateArticleMutation,
+  useGetArticleXlfQuery,
+  useReplaceArticleXlfMutation,
+} = articleApi;

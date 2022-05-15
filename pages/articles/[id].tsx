@@ -9,7 +9,12 @@ import { SentenceTokenizer } from "natural";
 import Header from "components/molecules/Header";
 import { FieldValues, useForm, UseFormRegister } from "react-hook-form";
 import Button from "components/atoms/Button";
-import { useUpdateArticleMutation } from "store/article/article.api";
+import {
+  useGetArticleQuery,
+  useGetArticleXlfQuery,
+  useReplaceArticleXlfMutation,
+  useUpdateArticleMutation,
+} from "store/article/article.api";
 import axios from "axios";
 
 interface Unit {
@@ -18,14 +23,24 @@ interface Unit {
   tt: string;
 }
 
-const Xlf: FC<{ xlf: string; article: Article }> = ({ xlf, article }) => {
+const Xlf: FC<{ initialArticleXlf: string; initialArticle: Article }> = ({
+  initialArticleXlf,
+  initialArticle,
+}) => {
   const [units, setUnits] = useState<Unit[] | null>(null);
 
-  const [updateArticle] = useUpdateArticleMutation();
+  const [replaceArticleXlf] = useReplaceArticleXlfMutation();
+  const { data: _articleXlf } = useGetArticleXlfQuery({
+    id: initialArticle.id,
+  });
+  const { data: _article } = useGetArticleQuery({ id: initialArticle.id });
+
+  const article = _article ? _article : initialArticle;
+  const articleXlf = _articleXlf ? _articleXlf.xlf : initialArticleXlf;
 
   useEffect(() => {
     const parser = new DOMParser();
-    const xml = parser.parseFromString(xlf, "text/xml");
+    const xml = parser.parseFromString(articleXlf, "text/xml");
     const _units = xml.getElementsByTagName("trans-unit");
     const units: Unit[] = [];
     for (let i = 0; i < _units.length; i++) {
@@ -39,33 +54,38 @@ const Xlf: FC<{ xlf: string; article: Article }> = ({ xlf, article }) => {
       });
     }
     setUnits(units);
-  }, []);
+  }, [articleXlf]);
 
   const { register, handleSubmit } = useForm();
 
   const onSubmit = handleSubmit((data: { units: { phrases: string[] }[] }) => {
     console.log({ data });
     const parser = new DOMParser();
-    const xml = parser.parseFromString(xlf, "text/xml");
+    const xml = parser.parseFromString(articleXlf, "text/xml");
     const _units = xml.getElementsByTagName("trans-unit");
     for (let i = 0; i < _units.length; i++) {
       const _unit = _units[i];
+      _unit.setAttribute("approved", "yes");
       let target = _unit.querySelector("target");
       if (target === null) {
-        target = document.createElement("target");
+        target = document.createElementNS(
+          "urn:oasis:names:tc:xliff:document:1.1",
+          "target"
+        );
         _unit.appendChild(target);
       }
       target.textContent = data.units[i].phrases.join(" ");
+      target.setAttribute("state", "final");
     }
     const serializer = new XMLSerializer();
     const newXlf = serializer.serializeToString(xml);
-    updateArticle({ id: article.id, body: { xlf: newXlf } });
+    replaceArticleXlf({ id: initialArticle.id, body: { xlf: newXlf } });
   });
 
   const onClickExport: MouseEventHandler = (event) => {
     const format = "odt";
     axios
-      .get(`/api/articles/${article.id}?format=${format}`, {
+      .get(`/api/articles/${initialArticle.id}/export?format=${format}`, {
         responseType: "blob",
       })
       .then((response) => {
@@ -74,7 +94,7 @@ const Xlf: FC<{ xlf: string; article: Article }> = ({ xlf, article }) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${article.title}.${format}`;
+        a.download = `${initialArticle.title}.${format}`;
         a.click();
       });
   };
@@ -115,7 +135,7 @@ const UnitComponent: FC<{
   }, []);
 
   return (
-    <fieldset className="p-2 rounded-lg bg-zinc-800">
+    <div className="p-2 rounded-lg bg-zinc-800">
       <p dir="auto" className="p-4 text-zinc-300">
         {unit.st}
       </p>
@@ -136,31 +156,33 @@ const UnitComponent: FC<{
           </div>
         ))}
       </div>
-    </fieldset>
+    </div>
   );
 };
 
 interface ArticleProps {
-  article: Article;
-  xlf: string;
+  initial: {
+    article: Article;
+    xlf: string;
+  };
 }
 
-const Home: FC<ArticleProps> = ({ article, xlf }) => {
+const Home: FC<ArticleProps> = ({ initial: { article, xlf } }) => {
   return (
     <div className={"flex flex-col h-full bg-zinc-600"}>
       <Header />
-      <Xlf xlf={xlf} article={article} />
+      <Xlf initialArticleXlf={xlf} initialArticle={article} />
     </div>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async ({
-  query: { id },
+  params: { id },
   res,
 }) => {
   const prisma = new PrismaClient();
   const article = await prisma.article.findUnique({
-    where: { id: +id as number },
+    where: { id: +id },
   });
   if (article === null) return { notFound: true };
   let xlf = "";
@@ -172,7 +194,9 @@ export const getServerSideProps: GetServerSideProps = async ({
   } catch (error) {
     return { notFound: true };
   }
-  return { props: { article: JSON.parse(JSON.stringify(article)), xlf } };
+  return {
+    props: { initial: { article: JSON.parse(JSON.stringify(article)), xlf } },
+  };
 };
 
 export default Home;
