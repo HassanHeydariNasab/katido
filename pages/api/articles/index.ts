@@ -16,10 +16,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method === "GET") {
-    const articles = await prisma.article.findMany();
-    res.status(200).json({ results: articles });
-  } else if (req.method === "POST") {
+  if (req.method === "POST") {
     const token = req.cookies.token;
     const userId = tokenToUserId(token, res);
     if (userId === null) return;

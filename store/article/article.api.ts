@@ -13,13 +13,14 @@ export const articleApi = createApi({
     }
   },
   endpoints: (builder) => ({
-    getArticles: builder.query<{ results: Article[] }, void>({
-      query: () => ({
-        method: "GET",
-        url: "/articles",
+    updateArticle: builder.mutation<{}, { id: number; body: { xlf: string } }>({
+      query: ({ id, body }) => ({
+        method: "PUT",
+        url: `/articles/${id}`,
+        body,
       }),
     }),
   }),
 });
 
-export const { useGetArticlesQuery } = articleApi;
+export const { useUpdateArticleMutation } = articleApi;

@@ -1,70 +1,142 @@
 import { readFile } from "node:fs/promises";
 import { cwd } from "node:process";
-import { useEffect, useState } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import type { FC } from "react";
 import type { GetServerSideProps } from "next";
 import { Phrase, PrismaClient } from "@prisma/client";
 import type { Article } from "@prisma/client";
 import { SentenceTokenizer } from "natural";
 import Header from "components/molecules/Header";
+import { FieldValues, useForm, UseFormRegister } from "react-hook-form";
+import Button from "components/atoms/Button";
+import { useUpdateArticleMutation } from "store/article/article.api";
+import axios from "axios";
 
 interface Unit {
+  seq: number;
   st: string;
   tt: string;
-  phrases: Partial<Phrase>[];
 }
 
-const Xlf: FC<{ xlf: string; title: string }> = ({ xlf, title }) => {
+const Xlf: FC<{ xlf: string; article: Article }> = ({ xlf, article }) => {
   const [units, setUnits] = useState<Unit[] | null>(null);
+
+  const [updateArticle] = useUpdateArticleMutation();
 
   useEffect(() => {
     const parser = new DOMParser();
     const xml = parser.parseFromString(xlf, "text/xml");
     const _units = xml.getElementsByTagName("trans-unit");
     const units: Unit[] = [];
-    const tokenizer = new SentenceTokenizer();
     for (let i = 0; i < _units.length; i++) {
       const _unit = _units[i];
       const st = _unit.querySelector("source")?.textContent || "";
       const tt = _unit.querySelector("target")?.textContent || "";
       units.push({
+        seq: i,
         st,
         tt,
-        phrases: tokenizer
-          .tokenize(st)
-          .map((sentence) => ({ st: sentence, tt: "" })),
       });
     }
     setUnits(units);
-  }, [xlf]);
+  }, []);
+
+  const { register, handleSubmit } = useForm();
+
+  const onSubmit = handleSubmit((data: { units: { phrases: string[] }[] }) => {
+    console.log({ data });
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(xlf, "text/xml");
+    const _units = xml.getElementsByTagName("trans-unit");
+    for (let i = 0; i < _units.length; i++) {
+      const _unit = _units[i];
+      let target = _unit.querySelector("target");
+      if (target === null) {
+        target = document.createElement("target");
+        _unit.appendChild(target);
+      }
+      target.textContent = data.units[i].phrases.join(" ");
+    }
+    const serializer = new XMLSerializer();
+    const newXlf = serializer.serializeToString(xml);
+    updateArticle({ id: article.id, body: { xlf: newXlf } });
+  });
+
+  const onClickExport: MouseEventHandler = (event) => {
+    const format = "odt";
+    axios
+      .get(`/api/articles/${article.id}?format=${format}`, {
+        responseType: "blob",
+      })
+      .then((response) => {
+        console.log(response.data);
+        const blob: Blob = response.data;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${article.title}.${format}`;
+        a.click();
+      });
+  };
 
   if (units === null) {
     return undefined;
   }
   return (
-    <div className="flex overflow-x-hidden overflow-y-scroll relative flex-col flex-1 gap-4 px-4">
-      <h2 className="px-4 text-center text-zinc-200">{title}</h2>
-      {units.map((unit, index) => (
-        <form key={index} className="p-2 rounded-lg bg-zinc-800">
-          <p dir="auto" className="p-4 text-zinc-300">
-            {unit.st}
-          </p>
-          <div className="p-4 text-white rounded-lg bg-zinc-900">
-            {unit.phrases.map((phrase, index) => (
-              <div key={index}>
-                <p dir="auto">{phrase.st}</p>
-                <textarea
-                  defaultValue={phrase.tt}
-                  className="p-2 w-full text-base text-white rounded-md bg-zinc-900"
-                  aria-multiline={"true"}
-                  dir="auto"
-                />
-              </div>
-            ))}
-          </div>
-        </form>
+    <form
+      onSubmit={onSubmit}
+      className="flex overflow-x-hidden overflow-y-scroll relative flex-col flex-1 gap-4 px-4"
+    >
+      <h2 className="px-4 text-center text-zinc-200">{article.title}</h2>
+      <div className="flex flex-row gap-4">
+        <Button type={"submit"}>Save</Button>
+        <Button type="button" variant="outlined" onClick={onClickExport}>
+          Export
+        </Button>
+      </div>
+      {units.map((unit) => (
+        <UnitComponent unit={unit} register={register} key={unit.seq} />
       ))}
-    </div>
+    </form>
+  );
+};
+
+const UnitComponent: FC<{
+  unit: Unit;
+  register: UseFormRegister<FieldValues>;
+}> = ({ unit, register }) => {
+  const [phrases, setPhrases] = useState<Partial<Phrase>[]>([]);
+
+  useEffect(() => {
+    const tokenizer = new SentenceTokenizer();
+    setPhrases(
+      tokenizer.tokenize(unit.st).map((sentence) => ({ st: sentence, tt: "" }))
+    );
+  }, []);
+
+  return (
+    <fieldset className="p-2 rounded-lg bg-zinc-800">
+      <p dir="auto" className="p-4 text-zinc-300">
+        {unit.st}
+      </p>
+      <p dir="auto" className="p-4 text-zinc-400">
+        {unit.tt}
+      </p>
+      <div className="p-4 text-white rounded-lg bg-zinc-900">
+        {phrases.map((phrase, index) => (
+          <div key={index}>
+            <p dir="auto">{phrase.st}</p>
+            <textarea
+              {...register(`units.${unit.seq}.phrases.${index}`)}
+              className="p-2 w-full text-base text-white rounded-md bg-zinc-900"
+              aria-multiline={"true"}
+              dir="auto"
+              data-index={index}
+            />
+          </div>
+        ))}
+      </div>
+    </fieldset>
   );
 };
 
@@ -77,7 +149,7 @@ const Home: FC<ArticleProps> = ({ article, xlf }) => {
   return (
     <div className={"flex flex-col h-full bg-zinc-600"}>
       <Header />
-      <Xlf xlf={xlf} title={article.title} />
+      <Xlf xlf={xlf} article={article} />
     </div>
   );
 };
