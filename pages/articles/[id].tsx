@@ -129,8 +129,11 @@ const UnitComponent: FC<{
 
   useEffect(() => {
     const tokenizer = new SentenceTokenizer();
+    const ttPhrases = tokenizer.tokenize(unit.tt);
     setPhrases(
-      tokenizer.tokenize(unit.st).map((sentence) => ({ st: sentence, tt: "" }))
+      tokenizer
+        .tokenize(unit.st)
+        .map((sentence, index) => ({ st: sentence, tt: ttPhrases[index] }))
     );
   }, []);
 
@@ -148,6 +151,7 @@ const UnitComponent: FC<{
             <p dir="auto">{phrase.st}</p>
             <textarea
               {...register(`units.${unit.seq}.phrases.${index}`)}
+              defaultValue={phrase.tt}
               className="p-2 w-full text-base text-white rounded-md bg-zinc-900"
               aria-multiline={"true"}
               dir="auto"
