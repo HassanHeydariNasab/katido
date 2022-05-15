@@ -6,15 +6,39 @@ _Gamified translation system_
 
 - libreoffice
 - unoserver
-- translate-toolkit
+- translate-toolkit (odf2xliff and xliff2odf)
+- redis
+- postgresql
 
 ## Development
 
-First, run the development server:
+Install packages:
 
 ```bash
-npm run dev
-# or
+yarn
+```
+
+Initialize PostgreSQL (also look into .env.local):
+
+```bash
+psql -U katido -d katido --file ./prisma/schema.sql
+```
+
+Generate Prisma client:
+
+```bash
+yarn prisma generate
+```
+
+Run unoserver:
+
+```bash
+python3 -m unoserver.server
+```
+
+Run the development server:
+
+```bash
 yarn dev
 ```
 
