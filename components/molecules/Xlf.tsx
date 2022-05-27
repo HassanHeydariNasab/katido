@@ -10,6 +10,16 @@ import {
   useGetArticleXlfQuery,
   useReplaceArticleXlfMutation,
 } from "store/article/article.api";
+import Selector from "components/atoms/Selector";
+
+const exportFormats = ["txt", "pdf", "odt", "docx"] as const;
+
+type ExportFormat = typeof exportFormats[number];
+
+const exportFormatsWithLabel = exportFormats.map((exportFormat) => ({
+  value: exportFormat,
+  label: exportFormat.toUpperCase(),
+}));
 
 interface Unit {
   seq: number;
@@ -21,6 +31,9 @@ export const Xlf: FC<{
   initialArticle: Article;
 }> = ({ initialArticleXlf, initialArticle }) => {
   const [units, setUnits] = useState<Unit[] | null>(null);
+  const [isExportFormatsOpen, setIsExportFormatsOpen] =
+    useState<boolean>(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>("odt");
 
   const [replaceArticleXlf] = useReplaceArticleXlfMutation();
   const { data: _articleXlf } = useGetArticleXlfQuery({
@@ -76,9 +89,8 @@ export const Xlf: FC<{
   });
 
   const onClickExport: MouseEventHandler = (event) => {
-    const format = "odt";
     axios
-      .get(`/api/articles/${initialArticle.id}/export?format=${format}`, {
+      .get(`/api/articles/${initialArticle.id}/export?format=${exportFormat}`, {
         responseType: "blob",
       })
       .then((response) => {
@@ -87,9 +99,17 @@ export const Xlf: FC<{
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${initialArticle.title}.${format}`;
+        a.download = `${initialArticle.title}.${exportFormat}`;
         a.click();
       });
+  };
+
+  const onClickToggleExportFormats: MouseEventHandler = (event) => {
+    setIsExportFormatsOpen((open) => !open);
+  };
+
+  const onChangeExportFormat = (value: ExportFormat) => {
+    setExportFormat(value);
   };
 
   if (units === null) {
@@ -102,10 +122,32 @@ export const Xlf: FC<{
     >
       <h2 className="px-4 text-center text-zinc-200">{article.title}</h2>
       <div className="flex flex-row gap-4">
-        <Button type={"submit"}>Save</Button>
-        <Button type="button" variant="outlined" onClick={onClickExport}>
-          Export
-        </Button>
+        <Button type="submit">Save</Button>
+        <div>
+          <Button
+            type="button"
+            variant="outlined"
+            onClick={onClickExport}
+            className="rounded-r-none"
+          >
+            Export as {exportFormat.toUpperCase()}
+          </Button>
+          <Button
+            type="button"
+            variant="outlined"
+            className="px-2 rounded-l-none border-l-0"
+            onClick={onClickToggleExportFormats}
+          >
+            ⏷{" "}
+            {isExportFormatsOpen && (
+              <Selector
+                value={exportFormat}
+                options={exportFormatsWithLabel}
+                onChange={onChangeExportFormat}
+              />
+            )}
+          </Button>
+        </div>
       </div>
       {units.map((unit) => (
         <UnitComponent unit={unit} register={register} key={unit.seq} />
