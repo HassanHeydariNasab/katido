@@ -16,7 +16,7 @@ const Home: FC<HomeProps> = ({ articles }) => {
       <h2 className="px-4 text-center text-zinc-200">Untranslated</h2>
       <div className="flex flex-wrap gap-8 justify-center px-4">
         {articles.map((article) => (
-          <ArticleCard article={article} />
+          <ArticleCard article={article} key={article.id} />
         ))}
       </div>
     </div>

@@ -40,4 +40,6 @@ const Selector: FC<SelectorProps> = ({ value, options, onChange }) => {
   );
 };
 
+Selector.displayName = "Selector";
+
 export default Selector;

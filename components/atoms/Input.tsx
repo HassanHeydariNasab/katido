@@ -38,4 +38,6 @@ const Input: FC<PropsWithChildren<InputProps>> = forwardRef(
   }
 );
 
+Input.displayName = "Input";
+
 export default Input;
