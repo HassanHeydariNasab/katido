@@ -14,7 +14,7 @@ import Selector from "components/atoms/Selector";
 
 const exportFormats = ["txt", "pdf", "odt", "docx"] as const;
 
-type ExportFormat = typeof exportFormats[number];
+type ExportFormat = (typeof exportFormats)[number];
 
 const exportFormatsWithLabel = exportFormats.map((exportFormat) => ({
   value: exportFormat,
@@ -170,7 +170,7 @@ const UnitComponent: FC<{
         .tokenize(unit.st)
         .map((sentence, index) => ({ st: sentence, tt: ttPhrases[index] }))
     );
-  }, []);
+  }, [unit.st, unit.tt]);
 
   return (
     <div className="p-2 rounded-lg bg-zinc-800">

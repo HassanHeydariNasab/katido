@@ -31,6 +31,7 @@ const Selector: FC<SelectorProps> = ({ value, options, onChange }) => {
             className={`${
               option.value === value ? "bg-slate-600" : "white"
             } px-4 py-2 hover:bg-slate-500 transition-colors`}
+            key={option.value}
           >
             {option.label}
           </div>
