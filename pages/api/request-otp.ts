@@ -23,7 +23,8 @@ export default async function handler(
     tedisPool.putTedis(tedis);
 
     console.log({ otp });
-    if (!sendVerificationCode(phoneNumber, otp)) {
+    const sent = await sendVerificationCode(phoneNumber, otp);
+    if (!sent) {
       res.status(500);
     }
 
