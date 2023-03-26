@@ -1,9 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { cwd } from "node:process";
+
 import type { FC } from "react";
 import type { GetServerSideProps } from "next";
+
 import { PrismaClient } from "@prisma/client";
 import type { Article } from "@prisma/client";
+
 import Header from "components/molecules/Header";
 import { Xlf } from "components/molecules/Xlf";
 
@@ -16,7 +19,7 @@ interface ArticleProps {
 
 const Home: FC<ArticleProps> = ({ initial: { article, xlf } }) => {
   return (
-    <div className={"flex flex-col h-full bg-zinc-600"}>
+    <div className={"flex flex-col h-full w-full bg-zinc-600"}>
       <Header />
       <Xlf initialArticleXlf={xlf} initialArticle={article} />
     </div>
@@ -25,7 +28,6 @@ const Home: FC<ArticleProps> = ({ initial: { article, xlf } }) => {
 
 export const getServerSideProps: GetServerSideProps = async ({
   params: { id },
-  res,
 }) => {
   const prisma = new PrismaClient();
   const article = await prisma.article.findUnique({
