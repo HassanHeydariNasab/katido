@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import type { FC, MouseEventHandler } from "react";
 import type { Article, Phrase } from "@prisma/client";
 import { SentenceTokenizer } from "natural";
@@ -118,14 +118,19 @@ export const Xlf: FC<{
 
   const populateFieldWithMachineTranslation = (
     fieldName: string,
-    st: string
+    st: string,
+    setIsLoading: Dispatch<SetStateAction<boolean>>
   ) => {
+    setIsLoading(true);
     translatePhrase({
       body: { st, to: "fa", from: "en" },
     })
       .unwrap()
       .then(({ tt }) => {
         setValue(fieldName, tt);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -180,11 +185,21 @@ export const Xlf: FC<{
   );
 };
 
-const UnitComponent: FC<{
+interface UnitComponentProps {
   unit: Unit;
   register: UseFormRegister<FieldValues>;
-  populateFieldWithMachineTranslation: (fieldName: string, st: string) => void;
-}> = ({ unit, register, populateFieldWithMachineTranslation }) => {
+  populateFieldWithMachineTranslation: (
+    fieldName: string,
+    st: string,
+    setIsLoading: Dispatch<SetStateAction<boolean>>
+  ) => void;
+}
+
+const UnitComponent: FC<UnitComponentProps> = ({
+  unit,
+  register,
+  populateFieldWithMachineTranslation,
+}) => {
   const [phrases, setPhrases] = useState<Partial<Phrase>[]>([]);
 
   useEffect(() => {
@@ -197,16 +212,6 @@ const UnitComponent: FC<{
     );
   }, [unit.st, unit.tt]);
 
-  const onClickTranslateByGoogle: MouseEventHandler<HTMLButtonElement> = (
-    event
-  ) => {
-    const phraseIndex = +event.currentTarget.dataset["index"];
-    populateFieldWithMachineTranslation(
-      `units.${unit.seq}.phrases.${phraseIndex}`,
-      phrases[phraseIndex].st
-    );
-  };
-
   return (
     <div className="p-2 rounded-lg bg-zinc-800">
       <p dir="auto" className="p-4 text-zinc-300">
@@ -216,28 +221,62 @@ const UnitComponent: FC<{
         {unit.tt}
       </p>
       <div className="p-4 text-white rounded-lg bg-zinc-900">
-        {phrases.map((phrase, index) => (
-          <div key={index}>
-            <p dir="auto">{phrase.st}</p>
-            <textarea
-              {...register(`units.${unit.seq}.phrases.${index}`)}
-              defaultValue={phrase.tt}
-              className="p-2 w-full text-base text-white rounded-md bg-zinc-900"
-              aria-multiline={"true"}
-              dir="auto"
-              data-index={index}
-            />
-            <Button
-              className="mb-4"
-              type="button"
-              data-index={index}
-              onClick={onClickTranslateByGoogle}
-            >
-              G
-            </Button>
-          </div>
+        {phrases.map((phrase, phraseIndex) => (
+          <PhraseComponent
+            key={phraseIndex}
+            phraseIndex={phraseIndex}
+            phrase={phrase}
+            unit={unit}
+            register={register}
+            populateFieldWithMachineTranslation={
+              populateFieldWithMachineTranslation
+            }
+          />
         ))}
       </div>
+    </div>
+  );
+};
+
+interface PhraseComponentProps extends UnitComponentProps {
+  phraseIndex: number;
+  phrase: Partial<Phrase>;
+}
+
+const PhraseComponent: FC<PhraseComponentProps> = ({
+  phraseIndex,
+  phrase,
+  unit,
+  register,
+  populateFieldWithMachineTranslation,
+}) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const onClickTranslateByGoogle: MouseEventHandler<HTMLButtonElement> = (
+    event
+  ) => {
+    populateFieldWithMachineTranslation(
+      `units.${unit.seq}.phrases.${phraseIndex}`,
+      phrase.st,
+      setIsLoading
+    );
+  };
+
+  return (
+    <div>
+      <p dir="auto">{phrase.st}</p>
+      <textarea
+        {...register(`units.${unit.seq}.phrases.${phraseIndex}`)}
+        defaultValue={phrase.tt}
+        className={`p-2 w-full text-base text-white rounded-md bg-zinc-900 ${
+          isLoading ? "bg-zinc-400" : ""
+        }`}
+        aria-multiline={"true"}
+        dir="auto"
+      />
+      <Button className="mb-4" type="button" onClick={onClickTranslateByGoogle}>
+        G
+      </Button>
     </div>
   );
 };
