@@ -15,10 +15,10 @@ _Gamified translation system_
 Install packages:
 
 ```bash
-yarn
+npm i
 ```
 
-Initialize PostgreSQL (also look into .env.local):
+Initialize PostgreSQL (also create .env.local according to .env):
 
 ```bash
 psql -U katido -d katido --file ./prisma/schema.sql
@@ -27,7 +27,7 @@ psql -U katido -d katido --file ./prisma/schema.sql
 Generate Prisma client:
 
 ```bash
-yarn prisma generate
+npm run prisma:generate
 ```
 
 Run unoserver:
@@ -39,7 +39,7 @@ python3 -m unoserver.server
 Run the development server:
 
 ```bash
-yarn dev
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
