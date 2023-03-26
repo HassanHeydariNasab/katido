@@ -21,6 +21,7 @@ export const articleApi = createApi({
       }),
       providesTags: (result, error, { id }) => [{ type: "article", id }],
     }),
+
     updateArticle: builder.mutation<
       void,
       { id: number; body: Partial<Article> }
@@ -32,6 +33,7 @@ export const articleApi = createApi({
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "article", id }],
     }),
+
     getArticleXlf: builder.query<{ xlf: string }, { id: number }>({
       query: ({ id }) => ({
         method: "GET",
@@ -39,6 +41,7 @@ export const articleApi = createApi({
       }),
       providesTags: (result, error, { id }) => [{ type: "articleXlf", id }],
     }),
+
     replaceArticleXlf: builder.mutation<
       void,
       { id: number; body: { xlf: string } }
@@ -50,6 +53,17 @@ export const articleApi = createApi({
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "articleXlf", id }],
     }),
+
+    translatePhrase: builder.mutation<
+      { tt: string },
+      { body: { st: string; from: string; to: string } }
+    >({
+      query: ({ body }) => ({
+        method: "POST",
+        url: "/translate",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -58,4 +72,5 @@ export const {
   useUpdateArticleMutation,
   useGetArticleXlfQuery,
   useReplaceArticleXlfMutation,
+  useTranslatePhraseMutation,
 } = articleApi;

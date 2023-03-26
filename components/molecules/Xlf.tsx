@@ -2,13 +2,16 @@ import { useEffect, useState } from "react";
 import type { FC, MouseEventHandler } from "react";
 import type { Article, Phrase } from "@prisma/client";
 import { SentenceTokenizer } from "natural";
-import { FieldValues, useForm, UseFormRegister } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import type { FieldValues, UseFormRegister } from "react-hook-form";
 import axios from "axios";
+
 import Button from "components/atoms/Button";
 import {
   useGetArticleQuery,
   useGetArticleXlfQuery,
   useReplaceArticleXlfMutation,
+  useTranslatePhraseMutation,
 } from "store/article/article.api";
 import Selector from "components/atoms/Selector";
 
@@ -40,6 +43,7 @@ export const Xlf: FC<{
     id: initialArticle.id,
   });
   const { data: _article } = useGetArticleQuery({ id: initialArticle.id });
+  const [translatePhrase] = useTranslatePhraseMutation();
 
   const article = _article ? _article : initialArticle;
   const articleXlf = _articleXlf ? _articleXlf.xlf : initialArticleXlf;
@@ -62,7 +66,7 @@ export const Xlf: FC<{
     setUnits(units);
   }, [articleXlf]);
 
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, setValue } = useForm();
 
   const onSubmit = handleSubmit((data: { units: { phrases: string[] }[] }) => {
     console.log({ data });
@@ -112,6 +116,19 @@ export const Xlf: FC<{
     setExportFormat(value);
   };
 
+  const populateFieldWithMachineTranslation = (
+    fieldName: string,
+    st: string
+  ) => {
+    translatePhrase({
+      body: { st, to: "fa", from: "en" },
+    })
+      .unwrap()
+      .then(({ tt }) => {
+        setValue(fieldName, tt);
+      });
+  };
+
   if (units === null) {
     return undefined;
   }
@@ -150,7 +167,14 @@ export const Xlf: FC<{
         </div>
       </div>
       {units.map((unit) => (
-        <UnitComponent unit={unit} register={register} key={unit.seq} />
+        <UnitComponent
+          unit={unit}
+          register={register}
+          populateFieldWithMachineTranslation={
+            populateFieldWithMachineTranslation
+          }
+          key={unit.seq}
+        />
       ))}
     </form>
   );
@@ -159,7 +183,8 @@ export const Xlf: FC<{
 const UnitComponent: FC<{
   unit: Unit;
   register: UseFormRegister<FieldValues>;
-}> = ({ unit, register }) => {
+  populateFieldWithMachineTranslation: (fieldName: string, st: string) => void;
+}> = ({ unit, register, populateFieldWithMachineTranslation }) => {
   const [phrases, setPhrases] = useState<Partial<Phrase>[]>([]);
 
   useEffect(() => {
@@ -171,6 +196,16 @@ const UnitComponent: FC<{
         .map((sentence, index) => ({ st: sentence, tt: ttPhrases[index] }))
     );
   }, [unit.st, unit.tt]);
+
+  const onClickTranslateByGoogle: MouseEventHandler<HTMLButtonElement> = (
+    event
+  ) => {
+    const phraseIndex = +event.currentTarget.dataset["index"];
+    populateFieldWithMachineTranslation(
+      `units.${unit.seq}.phrases.${phraseIndex}`,
+      phrases[phraseIndex].st
+    );
+  };
 
   return (
     <div className="p-2 rounded-lg bg-zinc-800">
@@ -192,6 +227,14 @@ const UnitComponent: FC<{
               dir="auto"
               data-index={index}
             />
+            <Button
+              className="mb-4"
+              type="button"
+              data-index={index}
+              onClick={onClickTranslateByGoogle}
+            >
+              G
+            </Button>
           </div>
         ))}
       </div>
