@@ -12,8 +12,10 @@
   "dependencies": {
     "@prisma/client": "3.13.0",
     "@reduxjs/toolkit": "^1.8.1",
+    "@types/kavenegar": "^1.1.0",
     "axios": "^0.27.2",
     "formidable": "v3",
+    "kavenegar": "^1.1.4",
     "memfs": "^3.4.1",
     "natural": "^5.2.2",
     "next": "12.1.6",

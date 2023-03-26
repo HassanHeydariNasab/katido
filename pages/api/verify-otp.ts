@@ -11,18 +11,18 @@ export default async function handler(
   res: NextApiResponse<any>
 ) {
   if (req.method === "POST") {
-    const { email, otp, name } = req.body;
+    const { phoneNumber, otp, name } = req.body;
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { phoneNumber } });
 
     const tedis = await tedisPool.getTedis();
-    const correctOtp = await tedis.get(email);
+    const correctOtp = await tedis.get(phoneNumber);
     let token: string | undefined;
     if (otp === correctOtp) {
       let createdUser: User | undefined;
       let userId: number | undefined;
       if (user === null) {
-        createdUser = await prisma.user.create({ data: { email, name } });
+        createdUser = await prisma.user.create({ data: { phoneNumber, name } });
         userId = createdUser.id;
       } else {
         userId = user.id;
@@ -32,7 +32,7 @@ export default async function handler(
         .setHeader("Set-Cookie", `token=${token}`)
         .status(createdUser ? 201 : 200)
         .json({});
-      tedis.del(email);
+      tedis.del(phoneNumber);
     } else {
       res.status(403).json({});
     }

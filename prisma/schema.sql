@@ -4,7 +4,7 @@ CREATE TABLE "public"."User" (
     "modifiedAt" TIMESTAMP NOT NULL DEFAULT now(),
 
     "name" VARCHAR(255) NOT NULL,
-    "email" VARCHAR(255) UNIQUE NOT NULL,
+    "phoneNumber" VARCHAR(255) UNIQUE NOT NULL,
     "coins" INTEGER NOT NULL DEFAULT 0
 );
 

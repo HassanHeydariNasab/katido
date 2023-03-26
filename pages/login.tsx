@@ -16,19 +16,21 @@ const Login: FC<LoginProps> = () => {
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<{ email: string }>();
+  } = useForm<{ phoneNumber: string }>();
 
   const [requestOtp, { isLoading }] = useRequestOtpMutation();
 
-  const onSubmitEmail = handleSubmit((data) => {
-    const { email } = data;
-    requestOtp({ body: { email } })
+  const onSubmitPhoneNumber = handleSubmit((data) => {
+    const { phoneNumber } = data;
+    requestOtp({ body: { phoneNumber } })
       .unwrap()
       .then(({ isUserExists }) => {
         router.push(
           {
             pathname: "/otp",
-            query: `email=${email}&isUserExists=${isUserExists ? 1 : 0}`,
+            query: `phoneNumber=${encodeURIComponent(
+              phoneNumber
+            )}&isUserExists=${isUserExists ? 1 : 0}`,
           },
           { pathname: "/otp" }
         );
@@ -42,16 +44,17 @@ const Login: FC<LoginProps> = () => {
       </Head>
       <form
         className="flex overflow-y-auto flex-col gap-8 justify-center items-center w-full h-full"
-        onSubmit={onSubmitEmail}
+        onSubmit={onSubmitPhoneNumber}
       >
         <p className="py-2 text-3xl font-bold text-center text-gray-600">
-          Enter your email
+          Enter your phone number
         </p>
         <Input
-          {...register("email", { required: true })}
-          label={"Email"}
-          placeholder={"name@mail.com"}
-          error={errors.email?.message}
+          {...register("phoneNumber", { required: true })}
+          label={"Phone Number"}
+          placeholder={"+989013792332"}
+          type="tel"
+          error={errors.phoneNumber?.message}
         />
         <Button type="submit">Continue &rarr;</Button>
       </form>

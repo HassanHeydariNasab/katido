@@ -10,7 +10,7 @@ import { userSlice } from "store/user/user.slice";
 
 const Otp: FC = () => {
   const router = useRouter();
-  const { email, isUserExists } = router.query;
+  const { phoneNumber, isUserExists } = router.query;
 
   const dispatch = useDispatch();
 
@@ -25,7 +25,13 @@ const Otp: FC = () => {
 
   const onSubmitCode = handleSubmit((data) => {
     const { otp, name } = data;
-    verifyOtp({ body: { email: email as string, otp, name } })
+    verifyOtp({
+      body: {
+        phoneNumber: decodeURIComponent(phoneNumber as string),
+        otp,
+        name,
+      },
+    })
       .unwrap()
       .then(() => {
         router.replace({ pathname: "/" });

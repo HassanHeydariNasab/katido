@@ -28,12 +28,12 @@ model Phrase {
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
-  createdAt  DateTime  @default(now()) @db.Timestamp(6)
-  modifiedAt DateTime  @default(now()) @db.Timestamp(6)
-  name       String    @db.VarChar(255)
-  email      String    @unique @db.VarChar(255)
-  coins      Int       @default(0)
-  Article    Article[]
-  Phrase     Phrase[]
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  modifiedAt  DateTime  @default(now()) @db.Timestamp(6)
+  name        String    @db.VarChar(255)
+  phoneNumber String    @unique @db.VarChar(255)
+  coins       Int       @default(0)
+  Article     Article[]
+  Phrase      Phrase[]
 }

@@ -16,7 +16,7 @@ export const userApi = createApi({
   endpoints: (builder) => ({
     requestOtp: builder.mutation<
       { isUserExists: boolean },
-      { body: { email: string } }
+      { body: { phoneNumber: string } }
     >({
       query: ({ body }) => ({
         method: "POST",
@@ -26,7 +26,7 @@ export const userApi = createApi({
     }),
     verifyOtp: builder.mutation<
       {},
-      { body: { otp: string; email: string; name?: string } }
+      { body: { otp: string; phoneNumber: string; name?: string } }
     >({
       query: ({ body }) => ({
         method: "POST",
