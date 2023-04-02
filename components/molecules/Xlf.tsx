@@ -6,23 +6,15 @@ import { useForm } from "react-hook-form";
 import type { FieldValues, UseFormRegister } from "react-hook-form";
 import axios from "axios";
 
-import Button from "components/atoms/Button";
 import {
   useGetArticleQuery,
   useGetArticleXlfQuery,
   useReplaceArticleXlfMutation,
   useTranslatePhraseMutation,
 } from "store/article/article.api";
-import Selector from "components/atoms/Selector";
+import { Menu, Button } from "components/atoms";
 
 const exportFormats = ["txt", "pdf", "odt", "docx"] as const;
-
-type ExportFormat = (typeof exportFormats)[number];
-
-const exportFormatsWithLabel = exportFormats.map((exportFormat) => ({
-  value: exportFormat,
-  label: exportFormat.toUpperCase(),
-}));
 
 interface Unit {
   seq: number;
@@ -34,9 +26,12 @@ export const Xlf: FC<{
   initialArticle: Article;
 }> = ({ initialArticleXlf, initialArticle }) => {
   const [units, setUnits] = useState<Unit[] | null>(null);
-  const [isExportFormatsOpen, setIsExportFormatsOpen] =
-    useState<boolean>(false);
-  const [exportFormat, setExportFormat] = useState<ExportFormat>("odt");
+
+  const exportFormatItems = exportFormats.map((exportFormat) => ({
+    value: exportFormat,
+    label: "Export As " + exportFormat.toUpperCase(),
+    onClick: () => onClickExportFormat(exportFormat),
+  }));
 
   const [replaceArticleXlf] = useReplaceArticleXlfMutation();
   const { data: _articleXlf } = useGetArticleXlfQuery({
@@ -92,9 +87,9 @@ export const Xlf: FC<{
     replaceArticleXlf({ id: initialArticle.id, body: { xlf: newXlf } });
   });
 
-  const onClickExport: MouseEventHandler = (event) => {
+  const onClickExportFormat = (value: string) => {
     axios
-      .get(`/api/articles/${initialArticle.id}/export?format=${exportFormat}`, {
+      .get(`/api/articles/${initialArticle.id}/export?format=${value}`, {
         responseType: "blob",
       })
       .then((response) => {
@@ -103,17 +98,9 @@ export const Xlf: FC<{
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${initialArticle.title}.${exportFormat}`;
+        a.download = `${initialArticle.title}.${value}`;
         a.click();
       });
-  };
-
-  const onClickToggleExportFormats: MouseEventHandler = (event) => {
-    setIsExportFormatsOpen((open) => !open);
-  };
-
-  const onChangeExportFormat = (value: ExportFormat) => {
-    setExportFormat(value);
   };
 
   const populateFieldWithMachineTranslation = (
@@ -145,31 +132,7 @@ export const Xlf: FC<{
       <h2 className="px-4 text-center text-zinc-200">{article.title}</h2>
       <div className="flex flex-row gap-4">
         <Button type="submit">Save</Button>
-        <div>
-          <Button
-            type="button"
-            variant="outlined"
-            onClick={onClickExport}
-            className="rounded-r-none"
-          >
-            Export as {exportFormat.toUpperCase()}
-          </Button>
-          <Button
-            type="button"
-            variant="outlined"
-            className="px-2 rounded-l-none border-l-0"
-            onClick={onClickToggleExportFormats}
-          >
-            ⏷{" "}
-            {isExportFormatsOpen && (
-              <Selector
-                value={exportFormat}
-                options={exportFormatsWithLabel}
-                onChange={onChangeExportFormat}
-              />
-            )}
-          </Button>
-        </div>
+        <Menu label="Export" items={exportFormatItems} />
       </div>
       {units.map((unit) => (
         <UnitComponent
