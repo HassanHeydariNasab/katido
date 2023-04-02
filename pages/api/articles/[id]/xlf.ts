@@ -1,11 +1,10 @@
 import { cwd } from "node:process";
-import { readFile, writeFile } from "node:fs/promises";
-import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
-import { tokenToUserId } from "utils/tokenToUserId";
 import { exec } from "node:child_process";
+import { readFile, writeFile } from "node:fs/promises";
 
-const prisma = new PrismaClient();
+import type { NextApiRequest, NextApiResponse } from "next";
+
+import { tokenToUserId } from "utils/tokenToUserId";
 
 export default async function handler(
   req: NextApiRequest,

@@ -1,11 +1,12 @@
 import { exec } from "node:child_process";
 import { cwd } from "node:process";
-import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
-import Formidable from "formidable";
-import { tokenToUserId } from "utils/tokenToUserId";
 
-const prisma = new PrismaClient();
+import type { NextApiRequest, NextApiResponse } from "next";
+import Formidable from "formidable";
+
+import { tokenToUserId } from "utils/tokenToUserId";
+import prisma from "prisma/prisma";
+
 export const config = {
   api: {
     bodyParser: false,

@@ -2,6 +2,7 @@ import type { FC } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+
 import Input from "components/atoms/Input";
 import Button from "components/atoms/Button";
 import { useRequestOtpMutation } from "store/user/user.api";

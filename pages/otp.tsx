@@ -3,10 +3,10 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
+
 import Button from "components/atoms/Button";
 import Input from "components/atoms/Input";
 import { useVerifyOtpMutation } from "store/user/user.api";
-import { userSlice } from "store/user/user.slice";
 
 const Otp: FC = () => {
   const router = useRouter();

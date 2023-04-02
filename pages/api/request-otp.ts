@@ -2,12 +2,9 @@ import Crypto from "crypto";
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { PrismaClient } from "@prisma/client";
-
+import prisma from "prisma/prisma";
 import { tedisPool } from "prisma/redis";
 import { sendVerificationCode } from "services/sms";
-
-const prisma = new PrismaClient();
 
 export default async function handler(
   req: NextApiRequest,

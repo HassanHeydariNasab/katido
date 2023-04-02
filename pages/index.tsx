@@ -1,9 +1,10 @@
 import { FC } from "react";
 import type { GetServerSideProps } from "next";
-import { PrismaClient } from "@prisma/client";
 import type { Article } from "@prisma/client";
+
 import ArticleCard from "components/molecules/ArticleCard";
 import Header from "components/molecules/Header";
+import prisma from "prisma/prisma";
 
 interface HomeProps {
   articles: Article[];
@@ -22,8 +23,6 @@ const Home: FC<HomeProps> = ({ articles }) => {
     </div>
   );
 };
-
-const prisma = new PrismaClient();
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const articles = await prisma.article.findMany();

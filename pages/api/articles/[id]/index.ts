@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
-import { tokenToUserId } from "utils/tokenToUserId";
 
-const prisma = new PrismaClient();
+import prisma from "prisma/prisma";
+import { tokenToUserId } from "utils/tokenToUserId";
 
 export default async function handler(
   req: NextApiRequest,

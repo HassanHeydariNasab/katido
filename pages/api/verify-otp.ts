@@ -1,10 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
 import type { User } from "@prisma/client";
 import { tedisPool } from "prisma/redis";
 import { create as createJWT } from "njwt";
 
-const prisma = new PrismaClient();
+import prisma from "prisma/prisma";
 
 export default async function handler(
   req: NextApiRequest,
