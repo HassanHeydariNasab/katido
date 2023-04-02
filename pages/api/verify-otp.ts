@@ -29,7 +29,10 @@ export default async function handler(
       }
       token = createJWT({ id: userId }, process.env.JWT_SECRET).compact();
       res
-        .setHeader("Set-Cookie", `token=${token}`)
+        .setHeader(
+          "Set-Cookie",
+          `token=${token}; Max-Age=${3600 * 24 * 30}; HttpOnly;`
+        )
         .status(createdUser ? 201 : 200)
         .json({});
       tedis.del(phoneNumber);
