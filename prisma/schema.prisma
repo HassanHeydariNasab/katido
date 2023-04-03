@@ -8,12 +8,14 @@ datasource db {
 }
 
 model Article {
-  id         Int      @id @default(autoincrement())
-  createdAt  DateTime @default(now()) @db.Timestamp(6)
-  modifiedAt DateTime @default(now()) @db.Timestamp(6)
-  title      String
-  ownerId    Int
-  User       User     @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now()) @db.Timestamp(6)
+  modifiedAt     DateTime @default(now()) @db.Timestamp(6)
+  title          String
+  sourceLanguage String   @db.VarChar(255)
+  targetLanguage String   @db.VarChar(255)
+  ownerId        Int
+  User           User     @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Phrase {

@@ -11,8 +11,10 @@ import {
   useGetArticleXlfQuery,
   useReplaceArticleXlfMutation,
   useTranslatePhraseMutation,
+  useUpdateArticleMutation,
 } from "store/article/article.api";
-import { Menu, Button } from "components/atoms";
+import { Menu, Button, Selector } from "components/atoms";
+import { languages } from "consts/languages";
 
 const exportFormats = ["txt", "pdf", "odt", "docx"] as const;
 
@@ -34,14 +36,15 @@ export const Xlf: FC<{
   }));
 
   const [replaceArticleXlf] = useReplaceArticleXlfMutation();
-  const { data: _articleXlf } = useGetArticleXlfQuery({
+  const { data: _articleXlfData } = useGetArticleXlfQuery({
     id: initialArticle.id,
   });
-  const { data: _article } = useGetArticleQuery({ id: initialArticle.id });
+  const { data: _articleData } = useGetArticleQuery({ id: initialArticle.id });
+  const [updateArticle] = useUpdateArticleMutation();
   const [translatePhrase] = useTranslatePhraseMutation();
 
-  const article = _article ? _article : initialArticle;
-  const articleXlf = _articleXlf ? _articleXlf.xlf : initialArticleXlf;
+  const article = _articleData?.article || initialArticle;
+  const articleXlf = _articleXlfData?.xlf || initialArticleXlf;
 
   useEffect(() => {
     const parser = new DOMParser();
@@ -103,6 +106,14 @@ export const Xlf: FC<{
       });
   };
 
+  const onChangeSourceLanguage = (sourceLanguage: string) => {
+    updateArticle({ id: article.id, body: { sourceLanguage } });
+  };
+
+  const onChangeTargetLanguage = (targetLanguage: string) => {
+    updateArticle({ id: article.id, body: { targetLanguage } });
+  };
+
   const populateFieldWithMachineTranslation = (
     fieldName: string,
     st: string,
@@ -110,7 +121,7 @@ export const Xlf: FC<{
   ) => {
     setIsLoading(true);
     translatePhrase({
-      body: { st, to: "fa", from: "en" },
+      body: { st, from: article.sourceLanguage, to: article.targetLanguage },
     })
       .unwrap()
       .then(({ tt }) => {
@@ -133,6 +144,19 @@ export const Xlf: FC<{
       <div className="flex flex-row gap-4">
         <Button type="submit">Save</Button>
         <Menu label="Export" items={exportFormatItems} />
+        <Selector
+          label="From"
+          value={article.sourceLanguage}
+          options={languages}
+          onChange={onChangeSourceLanguage}
+          containerClassName="ml-auto"
+        />
+        <Selector
+          label="To"
+          value={article.targetLanguage}
+          options={languages}
+          onChange={onChangeTargetLanguage}
+        />
       </div>
       {units.map((unit) => (
         <UnitComponent

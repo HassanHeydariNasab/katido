@@ -10,18 +10,30 @@ interface Option<T> {
 }
 
 interface SelectorProps<T> {
+  label?: string;
   value: T;
   options: Option<T>[];
   onChange: (value: T) => void;
+  containerClassName?: string;
 }
 
 const Selector = <T = Value,>({
+  label,
   value,
   options,
   onChange,
+  containerClassName,
 }: SelectorProps<T>) => {
   return (
-    <Listbox value={value} onChange={onChange}>
+    <Listbox
+      value={value}
+      onChange={onChange}
+      as="div"
+      className={containerClassName}
+    >
+      <Listbox.Label className="font-medium text-gray-400">
+        {label}
+      </Listbox.Label>
       <div className="relative w-fit">
         <Listbox.Button className="relative w-full h-full pl-8 pr-12 py-2 text-lg text-white bg-emerald-600 rounded-md border-none transition-colors cursor-pointer hover:bg-emerald-500 active:bg-emerald-700 font-medium">
           <span className="block truncate text-center">

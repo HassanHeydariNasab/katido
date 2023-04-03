@@ -14,6 +14,8 @@ CREATE TABLE "public"."Article" (
     "modifiedAt" TIMESTAMP NOT NULL DEFAULT now(),
 
     "title" TEXT NOT NULL,
+    "sourceLanguage" VARCHAR(255) NOT NULL,
+    "targetLanguage" VARCHAR(255) NOT NULL,
 
     "ownerId" INTEGER NOT NULL,
     FOREIGN KEY ("ownerId") REFERENCES "public"."User"(id)

@@ -14,7 +14,7 @@ export const articleApi = createApi({
   },
   tagTypes: ["article", "articleXlf"],
   endpoints: (builder) => ({
-    getArticle: builder.query<Article, { id: number }>({
+    getArticle: builder.query<{ article: Article }, { id: number }>({
       query: ({ id }) => ({
         method: "GET",
         url: `/articles/${id}`,
@@ -32,6 +32,19 @@ export const articleApi = createApi({
         body,
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "article", id }],
+      async onQueryStarted({ id, body }, { dispatch, queryFulfilled }) {
+        // TODO
+        const patchResult = dispatch(
+          articleApi.util.updateQueryData("getArticle", { id }, (draft) => {
+            Object.assign(draft, body);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
 
     getArticleXlf: builder.query<{ xlf: string }, { id: number }>({

@@ -14,7 +14,7 @@ export default async function handler(
   if (userId === null) return;
 
   if (req.method === "GET") {
-    const article = prisma.article.findUnique({ where: { id: +id } });
+    const article = await prisma.article.findUnique({ where: { id: +id } });
     if (article === null) {
       res.status(404).json({ message: "Article not found." });
     } else {

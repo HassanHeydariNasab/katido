@@ -29,6 +29,8 @@ export default async function handler(
           data: {
             title: file.originalFilename,
             ownerId: userId,
+            sourceLanguage: "en",
+            targetLanguage: "fa",
           },
         });
         exec(
